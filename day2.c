@@ -111,6 +111,7 @@ i8 calculate_next_outcome(FILE *file,
 
     const char opponent = line[0];
     const char player = line[2];
+    free(line);
 
     i8 ov = ov_func(opponent, player);
     i8 cv = cv_func(player);
