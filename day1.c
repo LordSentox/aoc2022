@@ -38,6 +38,23 @@ char *strtrim(char *string, size_t *size) {
     return trimmed;
 }
 
+void shift_elements_left(u32 *array, size_t pos)
+{
+    for (size_t i = 0; i < pos; ++i) {
+	array[i] = array[i+1];
+    }
+}
+
+void insert_into_max_array(u32 new, u32 *maximums, size_t len)
+{
+    for (size_t i = 0; i < len; ++i) {
+	if (new > maximums[i]) {
+	    shift_elements_left(maximums, i);
+	    maximums[i] = new;
+	}
+    }
+}
+
 i64 read_next_elfs_calories(FILE *file)
 {
     char *line = NULL;
@@ -77,14 +94,22 @@ int main()
     }
 
     u32 max = 0;
+    u32 max_array[3] = {0, 0, 0};
     i64 current;
     while ((current = read_next_elfs_calories(file)) != -1) {
 	max = u32_max(max, current);
-
-	printf("Elf carries: %d kcal\n", current);
+	insert_into_max_array(current, max_array, 3);
     }
 
     printf("Maximum number of calories: %d kcal\n", max);
+
+    // Add three highest together
+    u32 max_sum = 0;
+    for (u8 i = 0; i < 3; ++i) {
+	max_sum += max_array[i];
+    }
+
+    printf("Three top calory carriers' calories compounded: %d kcal\n", max_sum);
 
     return 0;
 }
