@@ -110,6 +110,7 @@ int main()
     }
 
     printf("Sum of mispacked item priorities: %d\n", priority_sum);
+    free(line);
 
     rewind(file);
 
