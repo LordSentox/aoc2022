@@ -32,3 +32,13 @@ char *strtrim(char *string, size_t *size) {
 
     return trimmed;
 }
+
+char *strnchr(const char *s, const char c, const size_t len)
+{
+    for (size_t i = 0; i < len; ++i) {
+	if (s[i] == c)
+	    return (char *) s + i;
+    }
+
+    return NULL;
+}

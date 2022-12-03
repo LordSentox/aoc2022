@@ -5,4 +5,6 @@
 
 char *strtrim(char *string, size_t *size);
 
+char *strnchr(const char *s, const char c, const size_t len);
+
 #endif /* STRING_EX_H */
