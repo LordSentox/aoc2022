@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define UNUSED __attribute__((unused))
+
 /* Return the value of the outcome. Input is what the opponent and the player have
  * chosen. The return will be 0 if the opponent wins, 3 if it is a draw and
  * finally, if the players wins it will be 6.
@@ -38,6 +40,44 @@ i8 outcome_value(const char opponent, const char player)
     return -1;
 }
 
+i8 outcome_value2(const char opponent, const char player)
+{
+    if (player == 'X') {
+	/* Always choose the wrong answer and only get points for it, no points
+	   for the outcome */
+	switch (opponent) {
+	case 'A': return 3;
+	case 'B': return 1;
+	case 'C': return 2;
+	default: return -1;
+	}
+    }
+
+    if (player == 'Y') {
+	/* Draw is valued as three, now we need to add the choice depending on
+	   what the opponent has chosen (we always choose the same) */
+	switch (opponent) {
+	case 'A': return 4;
+	case 'B': return 5;
+	case 'C': return 6;
+	default: return -1;
+	}
+    }
+
+    if (player == 'Z') {
+	/* Winning is valued at six, now we need to add the choice depending on
+	   what the opponent has chosen (always what is winning against them) */
+	switch (opponent) {
+	case 'A': return 8;
+	case 'B': return 9;
+	case 'C': return 7;
+	default: return -1;
+	}
+    }
+
+    return -1;
+}
+
 i8 choice_value(const char choice)
 {
     switch (choice) {
@@ -48,7 +88,15 @@ i8 choice_value(const char choice)
     }
 }
 
-i8 calculate_next_outcome(FILE *file)
+i8 choice_value2(UNUSED const char choice)
+{
+    // No longer a factor, since it's handled in outcome_value2
+    return 0;
+}
+
+i8 calculate_next_outcome(FILE *file,
+			  i8 (*ov_func)(const char, const char),
+			  i8 (*cv_func)(const char))
 {
     char *line = NULL;
     size_t len = 0;
@@ -64,8 +112,8 @@ i8 calculate_next_outcome(FILE *file)
     const char opponent = line[0];
     const char player = line[2];
 
-    i8 ov = outcome_value(opponent, player);
-    i8 cv = choice_value(player);
+    i8 ov = ov_func(opponent, player);
+    i8 cv = cv_func(player);
 
     if (ov == -1 || cv == -1)
 	return -1;
@@ -83,12 +131,20 @@ int main()
 
     u32 total_points = 0;
     i8 current_result;
-    while ((current_result = calculate_next_outcome(file)) != -1) {
+    while ((current_result = calculate_next_outcome(file, &outcome_value, &choice_value)) != -1) {
 	total_points += current_result;
     }
 
-    fclose(file);
+    printf("Total points for part one are: %d\n", total_points);
 
-    printf("Total points are: %d", total_points);
+    rewind(file);
+    total_points = 0;
+    while ((current_result = calculate_next_outcome(file, &outcome_value2, &choice_value2)) != -1) {
+	total_points += current_result;
+    }
+
+    printf("Total points for part two are: %d\n", total_points);
+    
+    fclose(file);
     return 0;
 }
