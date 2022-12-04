@@ -2,8 +2,8 @@
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 struct Pair
@@ -20,8 +20,8 @@ char *split_through_next(char *string, char c)
 
     // Check that the character was found
     if (next == NULL) {
-	printf("String was improperly formatted\n");
-	exit(EXIT_FAILURE);
+        printf("String was improperly formatted\n");
+        exit(EXIT_FAILURE);
     }
 
     // Split the string at this position, removing the character
@@ -32,9 +32,9 @@ char *split_through_next(char *string, char c)
 bool pair_one_range_hugs_other(const struct Pair *pair)
 {
     bool a_hugs_b = pair->range_a_start <= pair->range_b_start
-	&& pair->range_a_end >= pair->range_b_end;
+                    && pair->range_a_end >= pair->range_b_end;
     bool b_hugs_a = pair->range_b_start <= pair->range_a_start
-	&& pair->range_b_end >= pair->range_a_end;
+                    && pair->range_b_end >= pair->range_a_end;
 
     return a_hugs_b || b_hugs_a;
 }
@@ -46,10 +46,14 @@ bool range_contains(u32 start, u32 end, u32 point)
 
 bool pair_ranges_overlap(const struct Pair *pair)
 {
-    return range_contains(pair->range_a_start, pair->range_a_end, pair->range_b_start)
-	|| range_contains(pair->range_a_start, pair->range_a_end, pair->range_b_end)
-	|| range_contains(pair->range_b_start, pair->range_b_end, pair->range_a_start)
-	|| range_contains(pair->range_b_start, pair->range_b_end, pair->range_a_end);
+    return range_contains(pair->range_a_start, pair->range_a_end,
+                          pair->range_b_start)
+           || range_contains(pair->range_a_start, pair->range_a_end,
+                             pair->range_b_end)
+           || range_contains(pair->range_b_start, pair->range_b_end,
+                             pair->range_a_start)
+           || range_contains(pair->range_b_start, pair->range_b_end,
+                             pair->range_a_end);
 }
 
 struct Pair line_to_pair(char *string)
@@ -81,8 +85,8 @@ int main()
 {
     FILE *file = fopen("input/day4.txt", "r");
     if (file == NULL) {
-	printf("Unable to read input file\n");
-	return EXIT_FAILURE;
+        printf("Unable to read input file\n");
+        return EXIT_FAILURE;
     }
 
     char *line = NULL;
@@ -91,18 +95,21 @@ int main()
     u32 number_of_hugging_ranges = 0;
     u32 number_of_overlapping_ranges = 0;
     while ((read = getline(&line, &line_alloc, file)) != -1) {
-	bool hugs;
-	bool overlaps;
-	check_line_ranges(line, &hugs, &overlaps);
-	if (hugs)
-	    number_of_hugging_ranges++;
-	if (overlaps)
-	    number_of_overlapping_ranges++;
+        bool hugs;
+        bool overlaps;
+        check_line_ranges(line, &hugs, &overlaps);
+        if (hugs)
+            number_of_hugging_ranges++;
+        if (overlaps)
+            number_of_overlapping_ranges++;
     }
 
-    printf("Number of elves that do all the work another elf was also assigned to: %d\n", number_of_hugging_ranges);
-    printf("Number of pairs that have overlapping work: %d\n", number_of_overlapping_ranges);
-    
+    printf("Number of elves that do all the work another elf was also assigned "
+           "to: %d\n",
+           number_of_hugging_ranges);
+    printf("Number of pairs that have overlapping work: %d\n",
+           number_of_overlapping_ranges);
+
     free(line);
     fclose(file);
     return EXIT_SUCCESS;
