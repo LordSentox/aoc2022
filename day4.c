@@ -29,7 +29,7 @@ char *split_through_next(char *string, char c)
     return next + 1;
 }
 
-bool pair_one_range_hugs_other(struct Pair *pair)
+bool pair_one_range_hugs_other(const struct Pair *pair)
 {
     bool a_hugs_b = pair->range_a_start <= pair->range_b_start
 	&& pair->range_a_end >= pair->range_b_end;
@@ -37,6 +37,19 @@ bool pair_one_range_hugs_other(struct Pair *pair)
 	&& pair->range_b_end >= pair->range_a_end;
 
     return a_hugs_b || b_hugs_a;
+}
+
+bool range_contains(u32 start, u32 end, u32 point)
+{
+    return point >= start && point <= end;
+}
+
+bool pair_ranges_overlap(const struct Pair *pair)
+{
+    return range_contains(pair->range_a_start, pair->range_a_end, pair->range_b_start)
+	|| range_contains(pair->range_a_start, pair->range_a_end, pair->range_b_end)
+	|| range_contains(pair->range_b_start, pair->range_b_end, pair->range_a_start)
+	|| range_contains(pair->range_b_start, pair->range_b_end, pair->range_a_end);
 }
 
 struct Pair line_to_pair(char *string)
@@ -57,10 +70,11 @@ struct Pair line_to_pair(char *string)
     return pair;
 }
 
-bool line_describes_hugging_ranges(char *line)
+void check_line_ranges(char *line, bool *hugging, bool *overlapping)
 {
     struct Pair pair = line_to_pair(line);
-    return pair_one_range_hugs_other(&pair);
+    *hugging = pair_one_range_hugs_other(&pair);
+    *overlapping = pair_ranges_overlap(&pair);
 }
 
 int main()
@@ -75,12 +89,19 @@ int main()
     size_t line_alloc = 0;
     ssize_t read;
     u32 number_of_hugging_ranges = 0;
+    u32 number_of_overlapping_ranges = 0;
     while ((read = getline(&line, &line_alloc, file)) != -1) {
-	if (line_describes_hugging_ranges(line))
+	bool hugs;
+	bool overlaps;
+	check_line_ranges(line, &hugs, &overlaps);
+	if (hugs)
 	    number_of_hugging_ranges++;
+	if (overlaps)
+	    number_of_overlapping_ranges++;
     }
 
     printf("Number of elves that do all the work another elf was also assigned to: %d\n", number_of_hugging_ranges);
+    printf("Number of pairs that have overlapping work: %d\n", number_of_overlapping_ranges);
     
     free(line);
     fclose(file);
